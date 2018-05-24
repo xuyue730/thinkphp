@@ -1,0 +1,141 @@
+<?php
+/**
+ *
+ * User: dylan<2140509722@qq.com>
+ * Date: 2018/5/18 16:04
+ */
+
+namespace app\www\controller;
+
+use app\common\service\UserService;
+use app\common\service\UserFileService;
+use app\common\exception\Cake;
+use think\Image;
+
+/**
+ * 控制器类 用户文件
+ * @package app\www\controller
+ */
+class UserFile extends Base
+{
+
+    /**
+     * 前置执行代码
+     * @throws Cake
+     */
+    public function initialize()
+    {
+        parent::initialize();
+        $this->uid = 26;
+        $this::authentication();
+//        echo $this->uid;
+    }
+
+    /**
+     * 文件下载
+     * @return \think\Response|\think\response\Json
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function download()
+    {
+        try {
+            $id = request()->param("id");
+            return UserFileService::output($id, $this->uid);
+        } catch (Cake $e) {
+            return $this->err($e);
+        }
+    }
+
+    /**
+     * 图片剪切缩放
+     * @return \think\response\Json
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function thumb()
+    {
+        try {
+            $id = request()->param("id");
+            $width = request()->param("width", 100);
+            $height = request()->param("height", 100);
+            $type = request()->param("type", Image::THUMB_SCALING);
+            $noCache = request()->param("noCache", 0);
+            $fileInfo = UserFileService::fileInfo($id, $this->uid);
+            $filePath = UserFileService::SAVE_PATH . $fileInfo['path'];
+            if (!file_exists($filePath)) {
+                return $this->err(400, "文件不存在");
+            }
+            $image = Image::open($filePath);
+            $expire = 3600;
+            header("Content-type:" . (isset($fileInfo['mime']) ? $fileInfo['mime'] : "image/jpeg"));
+            if (!$noCache) {
+                // @todo 缓存以什么为创建时间和过期时间
+                header("Expires: " . gmdate("D, d M Y H:i:s", time() + $expire) . "  GMT");
+                header("Cache-Control: private,max-age=" . $expire);
+                header("Pragma: private,max-age=" . $expire);
+            }
+            $image->thumb($width, $height, $type)->save(null);
+            die();
+            /*
+             * 另一种方式，但是写硬盘性能不好
+            $tempFile = temp_file_path();
+            $image->thumb(100,100)->save($tempFile);
+            $content = file_get_contents($tempFile);
+            unlink($tempFile);
+            return response()->data($content)->contentType("image/jpeg");
+             */
+
+        } catch (Cake $e) {
+            return $this->err($e);
+        }
+    }
+
+    /**
+     * 单个文件上传
+     * 必须指定field字段
+     * 如果想获取上传进度，必须在上传时设置ini_get("session.upload_progress.name")隐藏字段值key；通过upload_progress?key=$key获取进度
+     *
+     * @return \think\response\Json
+     */
+    public function upload()
+    {
+        try {
+            $field = request()->param("field");
+            if (!$field) {
+                return $this->err(400, "必须用field指定上传图片表单的字段名");
+            }
+            if (!$_FILES[$field]) {
+                return $this->err(400, "未发现图片");
+            }
+            $file = request()->file($field);
+            $info = UserFileService::upload($file, $this->uid);
+            return $this->msg("ok", $info);
+        } catch (Cake $e) {
+            return $this->err($e);
+        }
+    }
+
+    /**
+     * 文件上传进度查询，请上传文件时用ajax访问
+     * @return \think\response\Json
+     */
+    public function upload_progress(){
+        $key = request()->param("key");
+        $data = UserFileService::progress($key);
+        return $this->msg("ok",$data);
+    }
+
+    /**
+     * base64方式上传文件
+     * @return \think\response\Json
+     * @throws Cake
+     */
+    public function upload_base64(){
+        $field = request()->param("field");
+        $info = UserFileService::base64Upload($field,26);
+        return $this->msg("ok",$info);
+    }
+}

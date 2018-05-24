@@ -1,0 +1,51 @@
+<?php
+/**
+ *
+ * User: dylan<2140509722@qq.com>
+ * Date: 2018/5/14 16:31
+ */
+
+namespace app\common\controller;
+
+
+use app\common\service\ResponseService;
+use think\Controller;
+use think\Db;
+
+class BaseController extends Controller
+{
+    public $sql_logs = [];
+
+    public function initialize()
+    {
+        parent::initialize();
+        if (config("app.app_debug")) {
+            Db::listen(function ($sql, $time, $explain) {
+                ResponseService::$sql_logs[] = $sql . ' [' . $time . 's]';
+//            dump($explain);
+            });
+        }
+    }
+
+    /**
+     * @param string $message
+     * @param array $info
+     * @return \think\response\Json
+     */
+    protected function msg($message = 'ok', $info = [])
+    {
+        return ResponseService::json_msg($message, $info);
+    }
+
+
+    /**
+     * @param int $code
+     * @param string $message
+     * @param array $info
+     * @return \think\response\Json
+     */
+    protected function err($code = 400, $message = "err", $info = [])
+    {
+        return ResponseService::json_err($code, $message, $info);
+    }
+}

@@ -1,0 +1,22 @@
+<?php
+/**
+ *
+ * User: dylan<2140509722@qq.com>
+ * Date: 2018/5/22 15:30
+ */
+namespace lib;
+
+/**
+ * 扩展类 演示
+ * @package lib
+ */
+class File extends \think\File
+{
+    public function isValid()
+    {
+        if ($this->isTest) {
+            return is_file($this->filename);
+        }
+        return true;
+    }
+}

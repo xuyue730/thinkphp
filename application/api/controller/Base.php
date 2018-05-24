@@ -1,0 +1,20 @@
+<?php
+/**
+ *
+ * User: dylan<2140509722@qq.com>
+ * Date: 2018/5/14 10:44
+ */
+
+namespace app\api\controller;
+
+
+use app\common\controller\BaseController;
+
+/**
+ * api模块 控制器基类
+ * @package app\api\controller
+ */
+class Base extends BaseController
+{
+
+}

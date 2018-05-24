@@ -1,0 +1,14 @@
+<?php
+/**
+ *
+ * User: dylan<2140509722@qq.com>
+ * Date: 2018/5/14 10:38
+ */
+
+namespace app\common\service;
+
+
+class BaseService
+{
+
+}

@@ -13,6 +13,8 @@
 // | 应用设置
 // +----------------------------------------------------------------------
 
+use think\facade\Env;
+
 return [
     // 应用名称
     'app_name'               => '',
@@ -54,7 +56,7 @@ return [
     // +----------------------------------------------------------------------
 
     // 默认模块名
-    'default_module'         => 'index',
+    'default_module'         => 'www',
     // 禁止访问模块
     'deny_module_list'       => ['common'],
     // 默认控制器名
@@ -122,10 +124,6 @@ return [
     'request_cache_expire'   => null,
     // 全局请求缓存排除规则
     'request_cache_except'   => [],
-    // 是否开启路由缓存
-    'route_check_cache'      => false,
-    // 路由缓存的Key自定义设置（闭包），默认为当前URL和请求类型的md5
-    'route_check_cache_key'  => '',
 
     // 默认跳转页面对应的模板文件
     'dispatch_success_tmpl'  => Env::get('think_path') . 'tpl/dispatch_jump.tpl',

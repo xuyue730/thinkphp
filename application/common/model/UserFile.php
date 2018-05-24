@@ -1,0 +1,20 @@
+<?php
+/**
+ *
+ * User: dylan<2140509722@qq.com>
+ * Date: 2018/5/18 11:16
+ */
+
+namespace app\common\model;
+
+/**
+ * 用户文件模型 user_file表
+ * @package app\common\model
+ */
+class UserFile extends Base
+{
+    /**
+     * @var string 自动写入时间戳字段 字段类型是datetime
+     */
+    protected $autoWriteTimestamp = 'datetime';
+}

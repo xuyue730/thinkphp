@@ -1,0 +1,236 @@
+<?php
+/**
+ *
+ * User: dylan<2140509722@qq.com>
+ * Date: 2018/5/15 10:12
+ */
+
+namespace app\www\controller;
+
+use app\common\exception\Cake;
+use app\common\service\UserFileService;
+use app\common\service\UserService;
+use think\facade\Log;
+use app\facade\Password;
+use \Firebase\JWT\JWT;
+
+/**
+ * 控制器类 演示
+ * @package app\www\controller
+ */
+class Test extends Base
+{
+    /**
+     * 演示
+     * @param string $name
+     * @return string
+     */
+    public function index($name = "tp5.1")
+    {
+        dump(config("app.app_debug"));
+        dump(env("app_debug"));
+        return 'hello,' . $name;
+    }
+
+    /**
+     * 演示 response json格式
+     * @return $this
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function json()
+    {
+        $rs = db("user")->find();
+        return json($rs)->code(200)->header(['Cache-control' => 'no-cache,must-revalidate']);
+    }
+
+    /**
+     * 演示 response html格式
+     * @return \think\response\View
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function html()
+    {
+        echo "使用缓存1";
+        $rs = db("user")->find();
+        return view("", $rs);
+    }
+
+    /**
+     * 演示 response jsonp格式
+     * @return \think\response\Jsonp
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function jsonp()
+    {
+        $rs = db("user")->find();
+        return jsonp($rs);
+    }
+
+    /**
+     * 演示 log功能
+     * @return string
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function log()
+    {
+        Log::error('错误信息');
+        Log::info('日志信息');
+
+        // 自定义app为tag的日志
+        // 独立日志文件在config/log.php中配置
+        Log::record("msg", "app", ["上下文"]);
+        $rs = db("article")->where("id", ">", 1)->find();
+
+        dump($rs);
+        return "ok";
+    }
+
+    /**
+     * 演示 config功能
+     * @return \think\response\Json
+     */
+    public function config()
+    {
+//        echo "未使用缓存1";
+        return $this->msg("ok", config());
+    }
+
+    public function note_exception()
+    {
+        echo request()->param()[0];
+    }
+
+    /**
+     * 演示 Password库
+     */
+    public function password()
+    {
+        echo Password::encrypt("您好") . "<br>";
+        echo Password::decrypt(Password::encrypt("您好")) . "<br>";
+        echo Password::md5("您好") . "<br>";
+        echo Password::sha1("您好") . "<br>";
+
+        echo $pass = Password::password_hash("123456");
+        dump(Password::password_verify("123456", $pass));
+
+    }
+
+    /**
+     * 演示 jwt库
+     * $token 内容并不加密，只是base64编码，再签名
+     */
+    public function jwt()
+    {
+        $key = config("password.key");
+        $token = array(
+            "iss" => "http://example.org",
+            "aud" => "http://example.com",
+            "iat" => 1356999524,
+            "nbf" => 1357000000
+        );
+
+        /**
+         * IMPORTANT:
+         * You must specify supported algorithms for your application. See
+         * https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-40
+         * for a list of spec-compliant algorithms.
+         */
+        $jwt = JWT::encode($token, $key);
+//        echo $jwt;
+        dump(base64_decode("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9leGFtcGxlLm9yZyIsImF1ZCI6Imh0dHA6XC9cL2V4YW1wbGUuY29tIiwiaWF0IjoxMzU2OTk5NTI0LCJuYmYiOjEzNTcwMDAwMDB9"));
+        $decoded = (array)JWT::decode($jwt, $key, array('HS256'));
+        echo strlen("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9leGFtcGxlLm9yZyIsImF1ZCI6Imh0dHA6XC9cL2V4YW1wbGUuY29tIiwiaWF0IjoxMzU2OTk5NTI0LCJuYmYiOjEzNTcwMDAwMDB9");
+        print_r($decoded);
+    }
+
+    /**
+     * 演示 token检查
+     */
+    public function token()
+    {
+        config("api.version","0.2");
+        $token = UserService::createToken("1");
+        dump($token);
+        try{
+            dump(UserService::checkToken("6900a8defa3170e79a735424f0a3f2157138cecc0fc24d1d6f0b288b8d35bb22ba9233b3f144e81a7b4ae771f8943173"));
+        }catch (Cake $e){
+            echo  $e->getMessage();
+        }
+        dump(Password::decrypt($token));
+
+    }
+
+    /**
+     * 演示 创建前端用户
+     */
+    public function create_user(){
+        UserService::create([
+            "username"=>"dylan"
+        ]);
+    }
+
+    /**
+     * 演示 读取用户文件
+     * @throws Cake
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function readFile(){
+        $id = request()->param("id");
+        $info =  UserFileService::fileInfo($id,26);
+        dump($info);
+    }
+
+    /**
+     * 演示 输出用户文件
+     * @return \think\Response|\think\response\Json
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function showFile(){
+        try{
+            $id = request()->param("id");
+            $user = UserService::check();
+            $user = ['uid'=>26];
+            if(!$user){
+                return $this->err(400,"未登录");
+            }
+            return UserFileService::output($id,$user['uid']);
+        }catch (Cake $e){
+            return $this->err($e);
+        }
+    }
+
+    /**
+     * 演示 缩略图
+     * @return $this
+     */
+    public function thumb(){
+        $image = \think\Image::open('../uploads/demo.jpg');
+        $tempFile = temp_file_path();
+        $image->thumb(100,100)->save($tempFile);
+        $content = file_get_contents($tempFile);
+        unlink($tempFile);
+        return response()->data($content)->contentType("image/jpeg");
+    }
+
+    /**
+     * 演示 随便
+     */
+    public function test(){
+        $image = \think\Image::open('../uploads/demo.jpg');
+        header("Content-type:image/jpeg");
+        $image->thumb(50,50)->save(null);
+        die();
+    }
+}

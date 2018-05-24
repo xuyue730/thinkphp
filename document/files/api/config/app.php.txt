@@ -1,0 +1,13 @@
+<?php
+/**
+ *
+ * User: dylan<2140509722@qq.com>
+ * Date: 2018/5/15 11:51
+ */
+return [
+    // 默认过滤用户提交数据 用逗号分隔多个
+    'default_filter'         => 'strip_tags',
+
+    // 异常处理
+    'exception_handle'       => '\\app\\common\\exception\\Json',
+];

@@ -1,0 +1,21 @@
+<?php
+/**
+ *
+ * User: dylan<2140509722@qq.com>
+ * Date: 2018/5/16 15:03
+ */
+
+namespace app\management\controller;
+
+
+class Manager
+{
+    public function login()
+    {
+
+    }
+
+    public function index(){
+
+    }
+}

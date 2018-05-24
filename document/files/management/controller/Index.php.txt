@@ -1,0 +1,71 @@
+<?php
+/**
+ * 示例
+ * User: dylan<2140509722@qq.com>
+ * Date: 2018/5/16 15:03
+ */
+
+namespace app\management\controller;
+
+
+use app\common\exception\Cake;
+use app\common\service\ManagerService;
+use think\captcha\Captcha;
+class Index extends Base
+{
+
+    /**
+     * @return \think\response\View
+     */
+    public function login(){
+        return view("");
+    }
+
+    /**
+     * @return \think\response\Json
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     * @throws \think\exception\PDOException
+     */
+    public function check_login(){
+        $param = request()->only(["username","password","code","code_password"]);
+        if($isCheckCode = false){
+            if(!isset($param['code']) || !$param['code']){
+            return $this->err(400,"缺少验证码");
+            }
+            if(!isset($param['code']) || !$this->check_verify($param['code'])){
+            return $this->err(400,"验证码错误");
+            }
+        }
+        try{
+            $manager = ManagerService::checkLogin($param);
+            ManagerService::doLogin($manager);
+            return $this->msg("ok");
+        }catch (Cake $e){
+            return $this->err($e);
+        }
+    }
+
+    /**
+     * 暂时用session 验证码检查，以后用验证 加密验证码字符串的方式
+     * @param $code
+     * @param string $str
+     * @return bool
+     */
+    public function check_verify($code,$str=""){
+        $captcha = new Captcha();
+        return $captcha->check($code, "manager_login");
+    }
+
+    /**
+     * @return \think\Response
+     */
+    function code(){
+        $captcha = new Captcha();
+        // 设置验证码字符为纯数字
+        $captcha->codeSet = '0123456789hkx';
+        return $captcha->entry();
+    }
+}

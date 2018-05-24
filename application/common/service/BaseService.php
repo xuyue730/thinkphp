@@ -1,0 +1,17 @@
+<?php
+/**
+ *
+ * User: dylan<2140509722@qq.com>
+ * Date: 2018/5/14 10:38
+ */
+
+namespace app\common\service;
+
+/**
+ * 服务类 基类 其它service类的父类
+ * @package app\common\service
+ */
+class BaseService
+{
+
+}

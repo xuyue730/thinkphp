@@ -1,0 +1,44 @@
+<?php
+/**
+ *
+ * User: dylan<2140509722@qq.com>
+ * Date: 2018/5/14 16:23
+ */
+
+namespace app\common\service;
+
+
+use app\common\exception\Cake;
+
+/**
+ * 服务类 文章 演示用
+ * @package app\common\service
+ */
+class ArticleService extends BaseService
+{
+
+    /**
+     * 文章搜索
+     * @param $param
+     * @return mixed
+     * @throws Cake
+     */
+    public static function list_article($param){
+        if(!$param){
+            throw new Cake("缺少参数",400);
+        }
+        if(isset($param['page']) && $param['page']){
+            $page = (int)$param['page'];
+        }else{
+            $page = 1;
+        }
+        if(isset($param['size']) && $param['size']){
+            $size = (int)$param['size'];
+        }else{
+            $size = 10;
+        }
+        $rs = db('article')->alias("a")->join("category c","a.category_id = c.category_id")
+            ->field("*")->page($page,$size)->select();
+        return $rs;
+    }
+}

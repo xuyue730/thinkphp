@@ -1,0 +1,64 @@
+<?php
+/**
+ *
+ * User: dylan<2140509722@qq.com>
+ * Date: 2018/5/16 16:46
+ */
+
+namespace app\common\service;
+
+
+use app\common\exception\Cake;
+use app\facade\Password;
+
+/**
+ * 服务类 后端管理员
+ * @package app\common\service
+ */
+class ManagerService
+{
+
+    /**
+     * 登录 验证
+     * @param $param
+     * @return mixed
+     * @throws Cake
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public static function checkLogin($param){
+        if(!isset($param['username']) || !isset($param['password']) || !$param['username'] || !$param['password']){
+            throw new Cake("缺少参数",400);
+        }
+        $manager = db("manager")->where("status","=",1)
+            ->where(function ($query) use($param){
+                $query->where('username',"=",$param['username'])->whereOr('email',"=" ,$param['username'])->whereOr("mobile","=",$param['username']);
+            })
+            ->find();
+        if(!$manager){
+            throw new Cake("找不到用户",400);
+        }
+        $passwordVerify = Password::password_verify($param['password'],$manager['password']);
+        if(!$passwordVerify){
+            throw new Cake("密码错误",400);
+        }
+        return $manager;
+    }
+
+    /**
+     * 登录 写入凭证 后台管理用session机制
+     * @param $manager
+     * @throws \think\Exception
+     * @throws \think\exception\PDOException
+     */
+    public static function doLogin($manager){
+        session("manager_username",$manager['username']);
+        session("manager_id",$manager['id']);
+        $data['update_time'] = date("Y-m-d H:i:s",time());
+        $data['last_ip'] = request()->ip();
+        db("manager")->where("id","=",$manager['id'])->update($data);
+    }
+
+
+}

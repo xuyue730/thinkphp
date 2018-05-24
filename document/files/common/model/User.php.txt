@@ -1,0 +1,25 @@
+<?php
+/**
+ *
+ * User: dylan<2140509722@qq.com>
+ * Date: 2018/5/14 13:15
+ */
+
+namespace app\common\model;
+
+
+class User extends Base
+{
+//    protected $pk = 'uid';
+//    protected $table = 'lyf_user';
+
+    /** @var int 正常状态 */
+    const STATUS_NORMAL = 1;
+
+    /** @var int 已删除状态 */
+    const STATUS_DELETED = 0;
+
+    protected $autoWriteTimestamp = 'datetime';
+
+
+}

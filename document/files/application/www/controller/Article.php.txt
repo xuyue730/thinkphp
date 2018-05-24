@@ -1,0 +1,38 @@
+<?php
+/**
+ * 演示控制器
+ * User: dylan<2140509722@qq.com>
+ * Date: 2018/5/14 16:39
+ */
+
+namespace app\www\controller;
+
+use app\common\exception\Cake;
+use app\common\service\ArticleService;
+
+/**
+ * 控制器类 演示
+ * @package app\www\controller
+ */
+class Article extends Base
+{
+    /**
+     * 演示
+     */
+    public function index(){
+
+    }
+
+    /**
+     * 演示 搜索
+     * @return \think\response\Json
+     */
+    public function search(){
+        try{
+            $param = request()->only(['page','size','uid','keyword','order','by']);
+            return $this->msg("ok",ArticleService::list_article($param));
+        }catch (Cake $e){
+            return $this->err($e);
+        }
+    }
+}

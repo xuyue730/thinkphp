@@ -1,0 +1,34 @@
+<?php
+/**
+ *
+ * User: dylan<2140509722@qq.com>
+ * Date: 2018/5/21 16:03
+ */
+
+namespace app\common\exception;
+
+use Exception;
+use think\exception\Handle;
+use app\common\service\ResponseService;
+
+
+/**
+ * 自定义异常拦截处理类,用于拦截thinkPHP异常
+ * 每个模块可以通过配置,独立指定异常拦截处理类
+ * @package app\common\exception
+ */
+class Json extends Handle
+{
+    /**
+     * 处理异常
+     * @param Exception $e
+     * @return \think\Response|\think\response\Json
+     */
+    public function render(Exception $e)
+    {
+        if ($e instanceof Cake) {
+            return ResponseService::json_err($e);
+        }
+        return parent::render($e);
+    }
+}

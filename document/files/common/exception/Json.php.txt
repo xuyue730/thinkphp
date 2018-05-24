@@ -1,0 +1,24 @@
+<?php
+/**
+ *
+ * User: dylan<2140509722@qq.com>
+ * Date: 2018/5/21 16:03
+ */
+
+namespace app\common\exception;
+
+use Exception;
+use app\common\exception\Cake;
+use think\exception\Handle;
+use app\common\service\ResponseService;
+
+class Json extends Handle
+{
+    public function render(Exception $e)
+    {
+        if ($e instanceof Cake) {
+            return ResponseService::json_err($e);
+        }
+        return parent::render($e);
+    }
+}
